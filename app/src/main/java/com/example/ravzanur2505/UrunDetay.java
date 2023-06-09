@@ -2,6 +2,7 @@ package com.example.ravzanur2505;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,9 +11,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
 import android.media.Image;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,12 +25,18 @@ import android.widget.TextClock;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.OneShotPreDrawListener;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 public class UrunDetay  extends AppCompatActivity {
     SQLiteDatabase database;
@@ -122,102 +133,74 @@ public class UrunDetay  extends AppCompatActivity {
             }
         });
     }
+
      public Bitmap resimKucultucu(Bitmap b, int buyukluk) {
          double oran = b.getWidth() / b.getHeight();
          double uzunluk = buyukluk / oran;
          return bitmap.createScaledBitmap(bitmap, buyukluk, (int) uzunluk, true);
      }
 
+     public  void  Kaydet() {
+         Bitmap kucukResim = resimKucultucu(bitmap, 250);
+         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+         kucukResim.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+         byte[] bytes = byteArrayOutputStream.toByteArray();
+         try {
+             ContentValues contentValues = new ContentValues();
+             contentValues.put("resim", bytes);
+             database.update("urunler", contentValues, "id = " + id, null);
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+     }
 
+     private  void  registerLauncher() {
+         galleryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+             @Override
+             public void onActivityResult(ActivityResult result) {
+                 if (result.getResultCode() == RESULT_OK) {
+                     Intent i = result.getData();
+                     if (i != null) {
+                         Uri galleryUri = i.getData();
+                         try {
+                             if (Build.VERSION.SDK_INT >= 28) {
+                                 ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), galleryUri);
+                                 bitmap = ImageDecoder.decodeBitmap(source);
+                                 urunResim.setImageBitmap(bitmap);
+                                 Kaydet();
+                             } else {
+                                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), galleryUri);
+                                 urunResim.setImageBitmap(bitmap);
+                                 Kaydet();
+                             }
+                         } catch (Exception e) {
+                             e.printStackTrace();
+                         }
+                     }
+                 }
+             }
+         });
 
+         galleryPermission = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
+             @Override
+             public void onActivityResult(Boolean result) {
+                 if (result) {
+                     Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                     galleryLauncher.launch(i);
+                 } else {
+                     Toast.makeText(UrunDetay.this, "izin vermeniz gerekli", Toast.LENGTH_LONG).show();
+                 }
+             }
+         });
+     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+     private  void  tanimlamalar() {
+         urunResim = findViewById(R.id.urunResim);
+         textViewUrunAdi = findViewById(R.id.textView10);
+         textViewUrunFiyat = findViewById(R.id.textView11);
+         textViewUrunAdet = findViewById(R.id.textView9);
+         btnDegistir = findViewById(R.id.btnDegistir);
+         btnSil = findViewById(R.id.btnSil);
+         btnGeri = findViewById(R.id.btnGeri);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

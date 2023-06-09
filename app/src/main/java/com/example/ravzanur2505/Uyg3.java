@@ -39,9 +39,9 @@ public class Uyg3  extends AppCompatActivity {
         listeUrunler.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent i = new Intent(Uyg3.this, UrunDetay.class);
-                i.putExtra("id", urunler.get(position).getId());
-                startActivity(i);
+                Intent intent = new Intent(Uyg3.this, UrunDetay.class);
+                intent.putExtra("id", urunler.get(i).getId());
+                startActivity(intent);
             }
         });
     }

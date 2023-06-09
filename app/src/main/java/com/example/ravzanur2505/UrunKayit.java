@@ -41,10 +41,10 @@ public class UrunKayit extends AppCompatActivity {
                 int kolonFiyat = cursor.getColumnIndex("fiyat");
                 int kolonAdet = cursor.getColumnIndex("adet");
 
-                while ((cursor.moveToNext()){
+                while (cursor.moveToNext()){
                     txtUrunAdi.setText(cursor.getString(kolonUrunAdi));
-                    txtUrunFiyat.setText(cursor.getString(kolonUrunFiyat)+"");
-                    txtUrunAdet.setText(cursor.getString(kolonUrunAdet)+"");
+                    txtUrunFiyat.setText(cursor.getString(kolonFiyat)+"");
+                    txtUrunAdet.setText(cursor.getString(kolonAdet)+"");
                 }
                 cursor.close();
 
@@ -55,45 +55,26 @@ public class UrunKayit extends AppCompatActivity {
         btnKaydet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mod.equals(degistir)) {
+                if(mod.equals("degistir")) {
                     String SORGU ="UPDATE urunler SET urunadi=?, fiyat=?, adet=? WHERE id=?";
+
                     SQLiteStatement result = database.compileStatement(SORGU);
-                    result.bindString(1);
+                    result.bindString(1, txtUrunAdi.getText().toString());
+                    result.bindDouble(2, Double.parseDouble(txtUrunFiyat.getText().toString()));
+                    result.bindLong(3, Integer.parseInt(txtUrunAdet.getText().toString()));
+                    result.execute();
                 }
+                Intent i = new Intent(UrunKayit.this, Uyg3.class);
+                startActivity(i);
             }
         });
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    private void  tanimlamalar() {
+        txtUrunAdi = findViewById(R.id.TxtUrunAdi);
+        txtUrunFiyat = findViewById(R.id.txtUrunFiyat);
+        txtUrunAdet = findViewById(R.id.txtUrunAdet);
+        btnKaydet = findViewById(R.id.btnKayit);
 
     }
 }
