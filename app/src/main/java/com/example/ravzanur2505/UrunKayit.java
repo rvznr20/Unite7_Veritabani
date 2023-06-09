@@ -1,4 +1,99 @@
 package com.example.ravzanur2505;
 
-public class UrunKayit {
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class UrunKayit extends AppCompatActivity {
+
+    SQLiteDatabase database;
+    EditText txtUrunAdi, txtUrunFiyat, txtUrunAdet;
+    Button btnKaydet;
+    int id;
+
+    @Override
+    protected void onCreate(@Nullable Bundle SavedInstanceState){
+        super.onCreate(SavedInstanceState);
+        setContentView(R.layout.uyg4_urun_kayit);
+
+        tanimlamalar();
+
+        Intent i = getIntent();
+        id = i.getIntExtra("id", 0);
+        String mod = i.getStringExtra("mod");
+        database = this.openOrCreateDatabase("Urun", MODE_PRIVATE,null);
+
+        if (mod.equals("degistir")){
+            try {
+                Cursor cursor = database.rawQuery("SELECT urunadi, fiyat, adet FROM urunler WHERE id=?",
+                        new String[]{String.valueOf(id)});
+
+
+                int kolonUrunAdi = cursor.getColumnIndex("urunadi");
+                int kolonFiyat = cursor.getColumnIndex("fiyat");
+                int kolonAdet = cursor.getColumnIndex("adet");
+
+                while ((cursor.moveToNext()){
+                    txtUrunAdi.setText(cursor.getString(kolonUrunAdi));
+                    txtUrunFiyat.setText(cursor.getString(kolonUrunFiyat)+"");
+                    txtUrunAdet.setText(cursor.getString(kolonUrunAdet)+"");
+                }
+                cursor.close();
+
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        btnKaydet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mod.equals(degistir)) {
+                    String SORGU ="UPDATE urunler SET urunadi=?, fiyat=?, adet=? WHERE id=?";
+                    SQLiteStatement result = database.compileStatement(SORGU);
+                    result.bindString(1);
+                }
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
 }
